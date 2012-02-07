@@ -6,4 +6,10 @@
     
 # Example
 
+to localhost:4900
+
+    $ node index.js 4900
+    
+to 61.222.87.71:4900
+    
     $ node index.js 4900 61.222.87.71
