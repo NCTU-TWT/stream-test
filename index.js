@@ -19,11 +19,15 @@ var client = net.connect(port, host, function () {
     console.log('connection to ' + host + ':' + port + ' established'); 
     
     
+    // chart
+    var chart = generator.sinusoid.chart();
+    client.write(JSON.stringify(chart));
+    
     setInterval(function () {
     
-        var data = JSON.stringify(generator.sinusoid());
+        var value = generator.sinusoid.value(chart.value.sinusoid);
+       client.write(JSON.stringify(value));
        
-        client.write(data);
     }, 100);
     
     
@@ -33,17 +37,33 @@ client.on('error', function (err) {
     console.log(err);
 });
 
+var IDGenerator = function () {
+    return Math.floor((Math.random() * 100000000))
+};
+
 // data generator
 var generator = {
-    sinusoid: function () {
-        var now = (new Date).getTime();
-        return {
-            name: 'Sinusoid',
-            value: Math.sin(now/200),
-            unit: '',
-            upperBound: 1,
-            lowerBound: -1
-        };
+    sinusoid: {
+        chart: function () {
+            return {
+                session: IDGenerator(),
+                name: 'sinusoid',
+                value: {
+                    'sinusoid': IDGenerator()
+                },
+                upperBound: 1,
+                lowerBound: -1,
+                reference: 0
+            }
+        },
+        value: function (id) {
+            var now = (new Date).getTime();
+            return {
+                id: id,
+                value: Math.sin(now/200),
+                time: now            
+            }
+        }
     }
 };
 
