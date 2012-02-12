@@ -14,28 +14,56 @@ if (process.argv.length === 3) {
 }
 
 // connection
-var client = net.connect(port, host, function () {
+var socket = new net.Socket;
+
+socket.connect(port, host);
+
+socket.on('connect', function () {
 
     console.log('connection to ' + host + ':' + port + ' established'); 
     
     
     // chart
     var chart = generator.sinusoid.chart();
-    client.write(JSON.stringify(chart));
+    
+    if (socket.writable) {
+        socket.write(JSON.stringify(chart));
+    }
     
     setInterval(function () {
     
+        // value
         var value = generator.sinusoid.value(chart.value.sinusoid);
-       client.write(JSON.stringify(value));
+        
+        if (socket.writable) {
+            socket.write(JSON.stringify(value));
+        }
        
-    }, 100);
-    
+    }, 500);
+        
     
 });
 
-client.on('error', function (err) {
+var reconnect = function () {
+    setTimeout(function () {
+        console.log('reconnect in 3 secs');
+        socket.connect(port, host);
+        
+    }, 3000);
+};
+
+
+socket.on('error', function (err) {
     console.log(err);
+    reconnect();
 });
+
+socket.on('end', function (err) {
+    console.log('socket end');
+    reconnect();
+});
+
+
 
 var IDGenerator = function () {
     return Math.floor((Math.random() * 100000000))
