@@ -23,20 +23,35 @@ socket.on('connect', function () {
     console.log('connection to ' + host + ':' + port + ' established'); 
     
     
-    // chart
-    var chart = generator.sinusoid.chart();
+    var header  = {},
+        data    = {};
+    
+    
+    //
+    //  headers
+    //
+    
+    header.sinusoid = generator.sinusoid.header();
+    header.foo      = generator.foo.header();
     
     if (socket.writable) {
-        socket.write(JSON.stringify(chart));
+        for(key in header)
+            socket.write(JSON.stringify(header[key]));
     }
+    
+    //
+    //  headers
+    //
     
     setInterval(function () {
     
         // value
-        var value = generator.sinusoid.value(chart.value.sinusoid);
+        data.sinusoid   = generator.sinusoid.data(header.sinusoid.stream.sinusoid);
+        data.foo        = generator.foo.data(header.foo.stream.foo);
         
         if (socket.writable) {
-            socket.write(JSON.stringify(value));
+            for(key in data)
+                socket.write(JSON.stringify(data[key]));
         }
        
     }, 500);
@@ -72,11 +87,11 @@ var IDGenerator = function () {
 // data generator
 var generator = {
     sinusoid: {
-        chart: function () {
+        header: function () {
             return {
                 session: IDGenerator(),
                 name: 'sinusoid',
-                value: {
+                stream: {
                     'sinusoid': IDGenerator()
                 },
                 upperBound: 1,
@@ -84,11 +99,33 @@ var generator = {
                 reference: 0
             }
         },
-        value: function (id) {
+        data: function (id) {
             var now = (new Date).getTime();
             return {
                 id: id,
                 value: Math.sin(now/200),
+                time: now            
+            }
+        }
+    },
+    foo: {
+        header: function () {
+            return {
+                session: IDGenerator(),
+                name: 'foo',
+                stream: {
+                    'foo': IDGenerator()
+                },
+                upperBound: 1,
+                lowerBound: -1,
+                reference: 0
+            }
+        },
+        data: function (id) {
+            var now = (new Date).getTime();
+            return {
+                id: id,
+                value: Math.round(Math.sin(now/200)) * 0.8,
                 time: now            
             }
         }
