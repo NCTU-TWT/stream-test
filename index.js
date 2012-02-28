@@ -23,31 +23,15 @@ socket.on('connect', function () {
     console.log('connection to ' + host + ':' + port + ' established'); 
     
     
-    var header  = {},
-        data    = {};
+    var data    = {};
     
     
-    //
-    //  headers
-    //
-    
-    header.sinusoid = generator.sinusoid.header();
-    header.foo      = generator.foo.header();
-    
-    if (socket.writable) {
-        for(key in header)
-            socket.write(JSON.stringify(header[key]));
-    }
-    
-    //
-    //  headers
-    //
     
     setInterval(function () {
     
         // value
-        data.sinusoid   = generator.sinusoid.data(header.sinusoid.stream.sinusoid);
-        data.foo        = generator.foo.data(header.foo.stream.foo);
+        data.sinusoid   = generator.sinusoid();
+        data.foo        = generator.foo();
         
         if (socket.writable) {
             for(key in data)
@@ -86,49 +70,25 @@ var IDGenerator = function () {
 
 // data generator
 var generator = {
-    sinusoid: {
-        header: function () {
-            return {
-                session: IDGenerator(),
-                name: 'sinusoid',
-                stream: {
-                    'sinusoid': IDGenerator()
-                },
-                upperBound: 1,
-                lowerBound: -1,
-                reference: 0
-            }
-        },
-        data: function (id) {
-            var now = (new Date).getTime();
-            return {
-                id: id,
-                value: Math.sin(now/200),
-                time: now            
-            }
-        }
+    sinusoid: function () {
+        var now = (new Date).getTime();
+        return {
+            name: 'Sinusoid',
+            value: Math.sin(now/200),
+            unit: '',
+            upperBound: 1,
+            lowerBound: -1
+        };
     },
-    foo: {
-        header: function () {
-            return {
-                session: IDGenerator(),
-                name: 'foo',
-                stream: {
-                    'foo': IDGenerator()
-                },
-                upperBound: 1,
-                lowerBound: -1,
-                reference: 0
-            }
-        },
-        data: function (id) {
-            var now = (new Date).getTime();
-            return {
-                id: id,
-                value: Math.round(Math.sin(now/200)) * 0.8,
-                time: now            
-            }
-        }
+    foo: function () {
+        var now = (new Date).getTime();
+        return {
+            name: 'Foo',
+            value: Math.sin(now/100),
+            unit: '',
+            upperBound: 1,
+            lowerBound: -1
+        };
     }
 };
 
