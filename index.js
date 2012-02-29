@@ -1,4 +1,5 @@
-var net = require('net');
+var net     = require('net'),
+    async   = require('async');
 
 
 var port = 4900,
@@ -30,12 +31,18 @@ socket.on('connect', function () {
     setInterval(function () {
     
         // value
-        data.sinusoid   = generator.sinusoid();
-        data.foo        = generator.foo();
+        data.sinusoid   = function (callback) {
+            socket.write(JSON.stringify(generator.sinusoid()));
+            process.nextTick(callback);
+        };
+        data.foo        = function (callback) {
+            socket.write(JSON.stringify(generator.foo()));
+            process.nextTick(callback);
+        };
         
         if (socket.writable) {
-            for(key in data)
-                socket.write(JSON.stringify(data[key]));
+        
+            async.series(data);        
         }
        
     }, 500);

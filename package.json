@@ -10,7 +10,9 @@
   "engines": {
     "node": "~0.6.8"
   },
-  "dependencies": {},
+  "dependencies": {
+    "async": "~ 0.1.18"
+  },
   "devDependencies": {},
   "optionalDependencies": {}
 }
